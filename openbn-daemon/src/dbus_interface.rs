@@ -54,6 +54,50 @@ pub fn create_ibus_text(text: &str) -> Value<'static> {
     Value::new(ibus_text_struct)
 }
 
+/// Constructs a styled IBusText with a standard underline attribute spanning the entire text.
+/// Text editors require composition attributes (like underlines) to render the preedit text inline in real-time.
+pub fn create_ibus_text_styled(text: &str) -> Value<'static> {
+    let mut attr_properties = Vec::<Value<'static>>::new();
+
+    if !text.is_empty() {
+        // IBusAttribute envelope: (sa{sv}uuii)
+        //   1. "IBusAttribute" (class: s)
+        //   2. Attachments (a{sv})
+        //   3. Type = 1 (Underline)
+        //   4. Value = 1 (Single Underline)
+        //   5. Start Index = 0
+        //   6. End Index = length in bytes
+        let attr_attachments = HashMap::<String, Value<'static>>::new();
+        let attr_struct = (
+            "IBusAttribute",
+            attr_attachments,
+            1u32, // IBUS_ATTR_TYPE_UNDERLINE
+            1u32, // IBUS_ATTR_UNDERLINE_SINGLE
+            0i32, // start_index
+            text.len() as i32, // end_index in bytes
+        );
+        attr_properties.push(Value::new(attr_struct));
+    }
+
+    let attr_attachments = HashMap::<String, Value<'static>>::new();
+    let attr_list_struct = (
+        "IBusAttrList",
+        attr_attachments,
+        attr_properties,
+    );
+    let attr_list_variant = Value::new(attr_list_struct);
+
+    let text_attachments = HashMap::<String, Value<'static>>::new();
+    let ibus_text_struct = (
+        "IBusText",
+        text_attachments,
+        text.to_string(),
+        attr_list_variant,
+    );
+
+    Value::new(ibus_text_struct)
+}
+
 // ----------------- IBusFactory -----------------
 
 pub struct IBusFactory;
@@ -208,7 +252,7 @@ impl IBusEngine {
             if let Some(preedit) = preedit_to_update {
                 let cursor_pos = preedit.chars().count() as u32;
                 let visible = !preedit.is_empty();
-                let text = create_ibus_text(&preedit);
+                let text = create_ibus_text_styled(&preedit);
                 let _ = Self::update_preedit_text(&ctxt, text, cursor_pos, visible, 0).await;
                 return true; // Swallowed
             }
@@ -282,7 +326,7 @@ impl IBusEngine {
             };
             
             let cursor_pos = preedit.chars().count() as u32;
-            let text = create_ibus_text(&preedit);
+            let text = create_ibus_text_styled(&preedit);
             let _ = Self::update_preedit_text(&ctxt, text, cursor_pos, true, 0).await;
             return true; // Consumed
         }

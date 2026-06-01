@@ -26,6 +26,13 @@ pub const RULES: &[Rule] = &[
         },
     },
     Rule {
+        roman: "rri",
+        token_type: TokenType::Vowel {
+            independent: "ঋ",
+            dependent: "ৃ",
+        },
+    },
+    Rule {
         roman: "NGG",
         token_type: TokenType::Sign("ঃ"),
     },
@@ -83,7 +90,18 @@ pub const RULES: &[Rule] = &[
         token_type: TokenType::Consonant("ফ"),
     },
     Rule {
+        roman: "Sh",
+        token_type: TokenType::Consonant("ষ"),
+    },
+    Rule {
         roman: "oi",
+        token_type: TokenType::Vowel {
+            independent: "ঐ",
+            dependent: "ৈ",
+        },
+    },
+    Rule {
+        roman: "OI",
         token_type: TokenType::Vowel {
             independent: "ঐ",
             dependent: "ৈ",
@@ -94,6 +112,27 @@ pub const RULES: &[Rule] = &[
         token_type: TokenType::Vowel {
             independent: "ঔ",
             dependent: "ৌ",
+        },
+    },
+    Rule {
+        roman: "OU",
+        token_type: TokenType::Vowel {
+            independent: "ঔ",
+            dependent: "ৌ",
+        },
+    },
+    Rule {
+        roman: "ee",
+        token_type: TokenType::Vowel {
+            independent: "ঈ",
+            dependent: "ী",
+        },
+    },
+    Rule {
+        roman: "oo",
+        token_type: TokenType::Vowel {
+            independent: "উ",
+            dependent: "ু",
         },
     },
     Rule {
@@ -179,7 +218,7 @@ pub const RULES: &[Rule] = &[
     },
     Rule {
         roman: "S",
-        token_type: TokenType::Consonant("ষ"),
+        token_type: TokenType::Consonant("শ"),
     },
     Rule {
         roman: "s",
@@ -250,15 +289,15 @@ pub const RULES: &[Rule] = &[
     Rule {
         roman: "o",
         token_type: TokenType::Vowel {
-            independent: "ও",
-            dependent: "ো",
+            independent: "অ",
+            dependent: "",
         },
     },
     Rule {
         roman: "O",
         token_type: TokenType::Vowel {
-            independent: "অ",
-            dependent: "",
+            independent: "ও",
+            dependent: "ো",
         },
     },
     Rule {

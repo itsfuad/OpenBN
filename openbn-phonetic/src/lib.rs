@@ -153,7 +153,13 @@ mod tests {
         assert_eq!(translate("i"), "ই");
         assert_eq!(translate("u"), "উ");
         assert_eq!(translate("e"), "এ");
-        assert_eq!(translate("o"), "ও");
+        assert_eq!(translate("o"), "অ");
+        assert_eq!(translate("O"), "ও");
+        assert_eq!(translate("ee"), "ঈ");
+        assert_eq!(translate("oo"), "উ");
+        assert_eq!(translate("OI"), "ঐ");
+        assert_eq!(translate("OU"), "ঔ");
+        assert_eq!(translate("rri"), "ঋ");
     }
 
     #[test]
@@ -162,7 +168,13 @@ mod tests {
         assert_eq!(translate("ki"), "কি");
         assert_eq!(translate("ku"), "কু");
         assert_eq!(translate("ke"), "কে");
-        assert_eq!(translate("ko"), "কো");
+        assert_eq!(translate("ko"), "ক");
+        assert_eq!(translate("kO"), "কো");
+        assert_eq!(translate("kee"), "কী");
+        assert_eq!(translate("koo"), "কু");
+        assert_eq!(translate("kOI"), "কৈ");
+        assert_eq!(translate("kOU"), "কৌ");
+        assert_eq!(translate("krri"), "কৃ");
     }
 
     #[test]
@@ -171,6 +183,9 @@ mod tests {
         assert_eq!(translate("kh"), "খ");
         assert_eq!(translate("g"), "গ");
         assert_eq!(translate("gh"), "ঘ");
+        assert_eq!(translate("S"), "শ");
+        assert_eq!(translate("Sh"), "ষ");
+        assert_eq!(translate("sh"), "শ");
     }
 
     #[test]
@@ -185,8 +200,11 @@ mod tests {
         assert_eq!(translate("ami"), "আমি");
         assert_eq!(translate("bangla"), "বাংলা");
         assert_eq!(translate("sabar"), "সবার");
-        assert_eq!(translate("kOtha"), "কথা");
-        assert_eq!(translate("kotha"), "কোথা");
+        assert_eq!(translate("kOtha"), "কোথা");
+        assert_eq!(translate("kotha"), "কথা");
+        assert_eq!(translate("khoTha"), "খঠা");
+        assert_eq!(translate("khOtha"), "খোথা");
+        assert_eq!(translate("khotha"), "খথা");
     }
 
     #[test]
