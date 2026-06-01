@@ -1,5 +1,5 @@
 [package]
-name = "openbn-phonetic"
+name = "bornika-phonetic"
 version = "0.1.0"
 edition = "2021"
 

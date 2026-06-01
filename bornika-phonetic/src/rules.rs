@@ -32,14 +32,6 @@ pub const RULES: &[Rule] = &[
             dependent: "ৃ",
         },
     },
-    Rule {
-        roman: "NGG",
-        token_type: TokenType::Sign("ঃ"),
-    },
-    Rule {
-        roman: "nGC",
-        token_type: TokenType::Sign("ঁ"),
-    },
     // Length 2
     Rule {
         roman: "kh",
@@ -136,12 +128,32 @@ pub const RULES: &[Rule] = &[
         },
     },
     Rule {
+        roman: "rr",
+        token_type: TokenType::Consonant("র"),
+    },
+    Rule {
         roman: "t`",
         token_type: TokenType::Sign("ৎ"),
     },
     Rule {
         roman: "..",
         token_type: TokenType::Punctuation("."),
+    },
+    Rule {
+        roman: "Ng",
+        token_type: TokenType::Consonant("ঙ"),
+    },
+    Rule {
+        roman: "NG",
+        token_type: TokenType::Consonant("ঞ"),
+    },
+    Rule {
+        roman: "ng",
+        token_type: TokenType::Sign("ং"),
+    },
+    Rule {
+        roman: "kx",
+        token_type: TokenType::Consonant("ক্ষ"),
     },
     // Length 1
     Rule {
@@ -238,7 +250,7 @@ pub const RULES: &[Rule] = &[
     },
     Rule {
         roman: "x",
-        token_type: TokenType::Consonant("ক্ষ"),
+        token_type: TokenType::Consonant("ক্স"),
     },
     Rule {
         roman: "w",
@@ -303,6 +315,14 @@ pub const RULES: &[Rule] = &[
     Rule {
         roman: "H",
         token_type: TokenType::Sign("ঃ"),
+    },
+    Rule {
+        roman: ":",
+        token_type: TokenType::Sign("ঃ"),
+    },
+    Rule {
+        roman: "^",
+        token_type: TokenType::Sign("ঁ"),
     },
     Rule {
         roman: "`",

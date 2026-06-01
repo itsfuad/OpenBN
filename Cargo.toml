@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "openbn-phonetic",
-    "openbn-daemon",
+    "bornika-phonetic",
+    "bornika-daemon",
 ]
 resolver = "2"

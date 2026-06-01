@@ -2,25 +2,27 @@ use std::sync::Mutex;
 use std::collections::HashMap;
 use zbus::{dbus_interface, SignalContext};
 use zbus::zvariant::{ObjectPath, Value};
-use openbn_phonetic::PhoneticEngine;
+use bornika_phonetic::PhoneticEngine;
 
 pub fn log_info(msg: &str) {
     use std::fs::OpenOptions;
     use std::io::Write;
-    if let Ok(mut file) = OpenOptions::new().create(true).append(true).open("/tmp/openbn.log") {
+    if let Ok(mut file) = OpenOptions::new().create(true).append(true).open("/tmp/bornika.log") {
         let _ = writeln!(file, "{}", msg);
     }
 }
 
 /// Checks if the keyval is an ASCII composition key.
-/// We only swallow key releases for alphanumeric characters, backtick (0x60), and period (0x2E).
-/// Space (0x20) and punctuation releases must pass through to prevent key repeat loops.
+/// We only swallow key releases for alphanumeric characters, backtick (0x60), period (0x2E),
+/// caret (0x5E), and colon (0x3A) when actively composing.
 fn is_composition_key(keyval: u32) -> bool {
     (0x30..=0x39).contains(&keyval) || // 0-9
     (0x41..=0x5A).contains(&keyval) || // A-Z
     (0x61..=0x7A).contains(&keyval) || // a-z
     keyval == 0x60 ||                  // backtick
-    keyval == 0x2E                     // period
+    keyval == 0x2E ||                  // period
+    keyval == 0x5E ||                  // caret (^)
+    keyval == 0x3A                     // colon (:)
 }
 
 /// Dynamically constructs the exact GVariant wire layout expected by the IBus daemon.
@@ -107,7 +109,7 @@ impl IBusFactory {
     #[dbus_interface(name = "CreateEngine")]
     async fn create_engine(&self, name: String) -> zbus::fdo::Result<ObjectPath<'_>> {
         log_info(&format!("IBusFactory: CreateEngine called for engine: {}", name));
-        Ok(ObjectPath::from_static_str("/org/freedesktop/IBus/Engine/openbn").unwrap())
+        Ok(ObjectPath::from_static_str("/org/freedesktop/IBus/Engine/bornika").unwrap())
     }
 }
 
@@ -194,11 +196,15 @@ impl IBusEngine {
         }
 
         if is_release {
-            // Consume key releases ONLY for actual composition keys in Bangla mode.
-            // This prevents key release event mismatches (which triggers a Reset),
-            // while allowing Space/Enter/Punctuation releases to pass through natively,
-            // completely avoiding infinite space repeats!
-            if bangla_mode && is_composition_key(keyval) {
+            // Consume key releases ONLY for actual composition keys in Bangla mode
+            // AND only if the composition buffer is NOT empty (meaning we captured the press).
+            // This prevents shortcut key release event mismatches (e.g. Ctrl+C), which
+            // could otherwise cause infinite repeating keys if Ctrl was released first!
+            let is_composing = {
+                let engine = self.engine.lock().unwrap();
+                !engine.is_empty()
+            };
+            if bangla_mode && is_composing && is_composition_key(keyval) {
                 return true;
             }
             return false; // Let other key releases pass through

@@ -41,25 +41,25 @@ fn get_ibus_address() -> Option<String> {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    crate::dbus_interface::log_info("OpenBN: Background daemon starting manually or via IBus...");
+    crate::dbus_interface::log_info("Bornika: Background daemon starting manually or via IBus...");
 
     // 1. Locate the IBus D-Bus address
     let ibus_addr = get_ibus_address().ok_or(
         "Could not locate active IBus D-Bus socket address. Please verify that ibus-daemon is running."
     )?;
-    crate::dbus_interface::log_info(&format!("OpenBN: Discovered active IBus address: {}", ibus_addr));
+    crate::dbus_interface::log_info(&format!("Bornika: Discovered active IBus address: {}", ibus_addr));
 
     // 2. Build D-Bus connection and register services on IBus session
     let _connection = ConnectionBuilder::address(ibus_addr.as_str())?
-        .name("org.freedesktop.IBus.OpenBN")? // Register well-known service name
+        .name("org.freedesktop.IBus.Bornika")? // Register well-known service name
         .serve_at("/org/freedesktop/IBus/Factory", IBusFactory)? // Register Factory endpoint
-        .serve_at("/org/freedesktop/IBus/Engine/openbn", IBusEngine::new())? // Register active Engine endpoint
+        .serve_at("/org/freedesktop/IBus/Engine/bornika", IBusEngine::new())? // Register active Engine endpoint
         .build()
         .await?;
 
-    crate::dbus_interface::log_info("OpenBN: Native Rust IME engine successfully registered on D-Bus. Active.");
+    crate::dbus_interface::log_info("Bornika: Native Rust IME engine successfully registered on D-Bus. Active.");
 
-    println!("OpenBN: Native Rust IME engine successfully registered on IBus. Waiting for active inputs...");
+    println!("Bornika: Native Rust IME engine successfully registered on IBus. Waiting for active inputs...");
 
     // 3. Keep the tokio asynchronous worker threads alive
     loop {

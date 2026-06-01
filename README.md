@@ -1,14 +1,14 @@
-# OpenBN: Bangla Phonetic IME for Linux (IBus)
+# Bornika: Bangla Phonetic IME for Linux (IBus)
 
-OpenBN is a lightweight, secure, pure-Rust background Input Method Editor (IME) for Linux. Designed natively for modern desktop systems (like Fedora running Wayland and GNOME), it allows typing Bangla phonetically using a standard QWERTY layout.
+Bornika is a lightweight, secure, pure-Rust background Input Method Editor (IME) for Linux. Designed natively for modern desktop systems (like Fedora running Wayland and GNOME), it allows typing Bangla phonetically using a standard QWERTY layout.
 
-By connecting directly to the **IBus (Intelligent Input Bus)** framework over the system's private D-Bus socket, OpenBN runs entirely in user space without requiring root privileges or installing heavy dynamic C development libraries.
+By connecting directly to the **IBus (Intelligent Input Bus)** framework over the system's private D-Bus socket, Bornika runs entirely in user space without requiring root privileges or installing heavy C development libraries.
 
 ---
 
 ## Key Features
 
-* **Complete Avro Phonetic Support:** Fully supports all standard phonetic combinations (e.g., `kotha` $\rightarrow$ `কথা`, `kOtha` $\rightarrow$ `কোথা`, `rri` $\rightarrow$ `ঋ`, `S` $\rightarrow$ `শ`, `Sh` $\rightarrow$ `ষ`).
+* **Complete Avro Phonetic Support:** Fully supports all standard phonetic combinations (e.g., `kotha` $\rightarrow$ `কথা`, `kOtha` $\rightarrow$ `কোথা`, `rri` $\rightarrow$ `ঋ`, `S` $\rightarrow$ `শ`, `Sh` $\rightarrow$ `ষ`, `borrd` $\rightarrow$ `বর্ড`).
 * **Wayland & X11 Native:** Native compatibility across all window servers by leveraging the IBus system service.
 * **Pure Rust Architecture:** Built using `tokio` and `zbus` to connect directly over D-Bus. No dynamic link bindings (`libibus-devel`, `glib2-devel`) are required to compile.
 * **On-the-Fly Toggle:** Press **`Ctrl + Space`** within any active text input to toggle between English and Bangla phonetic modes.
@@ -19,7 +19,7 @@ By connecting directly to the **IBus (Intelligent Input Bus)** framework over th
 
 ## Phonetic Layout Guide
 
-OpenBN follows the standard Avro phonetic transliteration guidelines:
+Bornika follows the standard Avro phonetic transliteration guidelines:
 
 ### Vowels & Diacritics (Kar / Matra)
 | Key | Independent | Dependent | Example |
@@ -50,8 +50,9 @@ OpenBN follows the standard Avro phonetic transliteration guidelines:
 | `r` | র | `l` | ল | `S` / `sh` | শ |
 | `Sh` | ষ | `s` | স | `h` | হ |
 | `R` | ড় | `Rh` | ঢ় | `y` / `Y` | য় / য-ফলা |
-| `t`` ` | ৎ | `ng` | ং | `:` | ঃ |
-| `^` | ঁ | `J` | জ় | `$` | ৳ |
+| `Ng` / `NG` | ঙ / ঞ | `ng` | ং | `:` | ঃ |
+| `^` | ঁ | `x` / `kx` | ক্স / ক্ষ | `J` | জ় |
+| `t`` ` | ৎ | `$` | ৳ | | |
 
 ---
 
@@ -62,7 +63,7 @@ OpenBN follows the standard Avro phonetic transliteration guidelines:
 * Rust Toolchain (Cargo & Rustc).
 
 ### Quick Install
-To compile and deploy the OpenBN service natively, run the automated installation script inside the repository:
+To compile and deploy the Bornika service natively, run the automated installation script inside the repository:
 
 ```bash
 ./install.sh
@@ -70,21 +71,21 @@ To compile and deploy the OpenBN service natively, run the automated installatio
 
 This script automatically:
 1. Compiles the phonetic engine and the daemon in release mode.
-2. Deploys the background binary to `~/.local/bin/openbn-daemon`.
-3. Registers the OpenBN engine template at `/usr/share/ibus/component/openbn.xml` (requires one-time `sudo` authentication to copy to the system directory).
+2. Deploys the background binary to `~/.local/bin/bornika-daemon`.
+3. Registers the Bornika engine template at `/usr/share/ibus/component/bornika.xml` (requires one-time `sudo` authentication to copy to the system directory).
 4. Restarts the active IBus daemon session to load the engine.
 
 ---
 
 ## System Activation
 
-Once installed, register OpenBN as an active Input Source in your desktop environment:
+Once installed, register Bornika as an active Input Source in your desktop environment:
 
 1. Open your system's **Settings** (e.g. GNOME Settings).
 2. Navigate to **Keyboard** $\rightarrow$ **Input Sources**.
 3. Click the **`+` (Add)** button.
-4. Select **Bengali** $\rightarrow$ **Bengali (OpenBN)** and click **Add**.
-5. Switch to the OpenBN input source from your top-bar menu or press **`Super + Space`**.
+4. Select **Bengali** $\rightarrow$ **Bengali (Bornika)** and click **Add**.
+5. Switch to the Bornika input source from your top-bar menu or press **`Super + Space`**.
 6. Type **`Ctrl + Space`** within any text input box to toggle between English and Bangla modes.
 
 ---
@@ -93,4 +94,4 @@ Once installed, register OpenBN as an active Input Source in your desktop enviro
 
 ## License
 
-OpenBN is open-source software. Feel free to use, modify, and distribute it under the terms of the project's license.
+Bornika is open-source software. Feel free to use, modify, and distribute it under the terms of the project's license.

@@ -1,0 +1,24 @@
+<component>
+	<name>org.freedesktop.IBus.Bornika</name>
+	<description>Bornika Bangla Phonetic Input Method</description>
+	<exec>__HOME__/.local/bin/bornika-daemon</exec>
+	<version>1.0.0</version>
+	<author>Bornika Contributors</author>
+	<license>MIT</license>
+	<homepage>https://github.com/itsfuad/Bornika</homepage>
+	<textdomain>bornika</textdomain>
+
+	<engines>
+		<engine>
+			<name>bornika</name>
+			<language>bn</language>
+			<license>MIT</license>
+			<author>Bornika Contributors</author>
+			<icon>bornika</icon>
+			<layout>us</layout>
+			<longname>Bengali (Bornika)</longname>
+			<description>Bornika Bangla Phonetic Input Method</description>
+			<rank>99</rank>
+		</engine>
+	</engines>
+</component>

@@ -186,6 +186,10 @@ mod tests {
         assert_eq!(translate("S"), "শ");
         assert_eq!(translate("Sh"), "ষ");
         assert_eq!(translate("sh"), "শ");
+        assert_eq!(translate("Ng"), "ঙ");
+        assert_eq!(translate("NG"), "ঞ");
+        assert_eq!(translate("x"), "ক্স");
+        assert_eq!(translate("kx"), "ক্ষ");
     }
 
     #[test]
@@ -205,6 +209,12 @@ mod tests {
         assert_eq!(translate("khoTha"), "খঠা");
         assert_eq!(translate("khOtha"), "খোথা");
         assert_eq!(translate("khotha"), "খথা");
+        assert_eq!(translate("linax"), "লিনাক্স");
+        assert_eq!(translate("ka^"), "কঁ");
+        assert_eq!(translate("ba:"), "বঃ");
+        assert_eq!(translate("orrko"), "অর্ক");
+        assert_eq!(translate("borrd"), "বর্ড");
+        assert_eq!(translate("bOrrd"), "বোর্ড");
     }
 
     #[test]
