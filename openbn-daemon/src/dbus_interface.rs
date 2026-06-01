@@ -12,6 +12,17 @@ pub fn log_info(msg: &str) {
     }
 }
 
+/// Checks if the keyval is an ASCII composition key.
+/// We only swallow key releases for alphanumeric characters, backtick (0x60), and period (0x2E).
+/// Space (0x20) and punctuation releases must pass through to prevent key repeat loops.
+fn is_composition_key(keyval: u32) -> bool {
+    (0x30..=0x39).contains(&keyval) || // 0-9
+    (0x41..=0x5A).contains(&keyval) || // A-Z
+    (0x61..=0x7A).contains(&keyval) || // a-z
+    keyval == 0x60 ||                  // backtick
+    keyval == 0x2E                     // period
+}
+
 /// Dynamically constructs the exact GVariant wire layout expected by the IBus daemon.
 /// 
 /// In IBus, all serializable objects must be wrapped in an IBusSerializable envelope:
@@ -98,7 +109,7 @@ impl IBusEngine {
 
         if was_not_empty {
             let empty_text = create_ibus_text("");
-            let _ = Self::update_preedit_text(&ctxt, empty_text, 0, false).await;
+            let _ = Self::update_preedit_text(&ctxt, empty_text, 0, false, 0).await;
         }
     }
 
@@ -121,7 +132,6 @@ impl IBusEngine {
         state: u32,
     ) -> bool {
         let is_release = (state & (1 << 30)) != 0;
-        
         let bangla_mode = {
             let engine = self.engine.lock().unwrap();
             engine.bangla_mode
@@ -132,8 +142,22 @@ impl IBusEngine {
             keyval, keycode, state, is_release, bangla_mode
         ));
 
+        // 1. Bypass modifiers like Control, Alt, or Super (Ctrl = 4, Alt = 8, Super = 64)
+        // This ensures system shortcuts (Ctrl+A, Ctrl+C, etc.) work perfectly under both layouts.
+        let has_modifiers = (state & (4 | 8 | 64)) != 0;
+        if has_modifiers {
+            return false;
+        }
+
         if is_release {
-            return false; // Pass through releases
+            // Consume key releases ONLY for actual composition keys in Bangla mode.
+            // This prevents key release event mismatches (which triggers a Reset),
+            // while allowing Space/Enter/Punctuation releases to pass through natively,
+            // completely avoiding infinite space repeats!
+            if bangla_mode && is_composition_key(keyval) {
+                return true;
+            }
+            return false; // Let other key releases pass through
         }
 
         // Toggle layout mode: Ctrl + Space (Ctrl mask = 4, Space keyval = 0x20)
@@ -153,7 +177,7 @@ impl IBusEngine {
 
             if cleared {
                 let empty_text = create_ibus_text("");
-                let _ = Self::update_preedit_text(&ctxt, empty_text, 0, false).await;
+                let _ = Self::update_preedit_text(&ctxt, empty_text, 0, false, 0).await;
             }
             return true; // Swallowed
         }
@@ -185,7 +209,7 @@ impl IBusEngine {
                 let cursor_pos = preedit.chars().count() as u32;
                 let visible = !preedit.is_empty();
                 let text = create_ibus_text(&preedit);
-                let _ = Self::update_preedit_text(&ctxt, text, cursor_pos, visible).await;
+                let _ = Self::update_preedit_text(&ctxt, text, cursor_pos, visible, 0).await;
                 return true; // Swallowed
             }
             return false;
@@ -206,7 +230,7 @@ impl IBusEngine {
             if let Some(committed) = committed_text {
                 // Clear preedit visually
                 let empty_text = create_ibus_text("");
-                let _ = Self::update_preedit_text(&ctxt, empty_text, 0, false).await;
+                let _ = Self::update_preedit_text(&ctxt, empty_text, 0, false, 0).await;
                 
                 // Commit current word
                 let text = create_ibus_text(&committed);
@@ -239,7 +263,7 @@ impl IBusEngine {
             if let Some(committed) = committed_text {
                 // Clear preedit
                 let empty_text = create_ibus_text("");
-                let _ = Self::update_preedit_text(&ctxt, empty_text, 0, false).await;
+                let _ = Self::update_preedit_text(&ctxt, empty_text, 0, false, 0).await;
                 
                 // Commit word
                 let text = create_ibus_text(&committed);
@@ -259,7 +283,7 @@ impl IBusEngine {
             
             let cursor_pos = preedit.chars().count() as u32;
             let text = create_ibus_text(&preedit);
-            let _ = Self::update_preedit_text(&ctxt, text, cursor_pos, true).await;
+            let _ = Self::update_preedit_text(&ctxt, text, cursor_pos, true, 0).await;
             return true; // Consumed
         }
 
@@ -276,5 +300,6 @@ impl IBusEngine {
         text: Value<'_>,
         cursor_pos: u32,
         visible: bool,
+        mode: u32,
     ) -> zbus::Result<()>;
 }

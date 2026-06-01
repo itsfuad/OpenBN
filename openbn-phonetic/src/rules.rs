@@ -257,8 +257,8 @@ pub const RULES: &[Rule] = &[
     Rule {
         roman: "O",
         token_type: TokenType::Vowel {
-            independent: "ও",
-            dependent: "ো",
+            independent: "অ",
+            dependent: "",
         },
     },
     Rule {

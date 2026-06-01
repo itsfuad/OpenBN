@@ -185,6 +185,8 @@ mod tests {
         assert_eq!(translate("ami"), "আমি");
         assert_eq!(translate("bangla"), "বাংলা");
         assert_eq!(translate("sabar"), "সবার");
+        assert_eq!(translate("kOtha"), "কথা");
+        assert_eq!(translate("kotha"), "কোথা");
     }
 
     #[test]
