@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "openbn-phonetic",
+    "openbn-daemon",
+]
+resolver = "2"

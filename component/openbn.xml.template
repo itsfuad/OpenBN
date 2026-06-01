@@ -1,0 +1,24 @@
+<component>
+	<name>org.freedesktop.IBus.OpenBN</name>
+	<description>OpenBN Bangla Phonetic Input Method</description>
+	<exec>__HOME__/.local/bin/openbn-daemon</exec>
+	<version>1.0.0</version>
+	<author>OpenBN Contributors</author>
+	<license>MIT</license>
+	<homepage>https://github.com/itsfuad/OpenBN</homepage>
+	<textdomain>openbn</textdomain>
+
+	<engines>
+		<engine>
+			<name>openbn</name>
+			<language>bn</language>
+			<license>MIT</license>
+			<author>OpenBN Contributors</author>
+			<icon>openbn</icon>
+			<layout>us</layout>
+			<longname>Bengali (OpenBN)</longname>
+			<description>OpenBN Bangla Phonetic Input Method</description>
+			<rank>99</rank>
+		</engine>
+	</engines>
+</component>
