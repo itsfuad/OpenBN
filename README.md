@@ -1,0 +1,96 @@
+# OpenBN: Bangla Phonetic IME for Linux (IBus)
+
+OpenBN is a lightweight, secure, pure-Rust background Input Method Editor (IME) for Linux. Designed natively for modern desktop systems (like Fedora running Wayland and GNOME), it allows typing Bangla phonetically using a standard QWERTY layout.
+
+By connecting directly to the **IBus (Intelligent Input Bus)** framework over the system's private D-Bus socket, OpenBN runs entirely in user space without requiring root privileges or installing heavy dynamic C development libraries.
+
+---
+
+## Key Features
+
+* **Complete Avro Phonetic Support:** Fully supports all standard phonetic combinations (e.g., `kotha` $\rightarrow$ `কথা`, `kOtha` $\rightarrow$ `কোথা`, `rri` $\rightarrow$ `ঋ`, `S` $\rightarrow$ `শ`, `Sh` $\rightarrow$ `ষ`).
+* **Wayland & X11 Native:** Native compatibility across all window servers by leveraging the IBus system service.
+* **Pure Rust Architecture:** Built using `tokio` and `zbus` to connect directly over D-Bus. No dynamic link bindings (`libibus-devel`, `glib2-devel`) are required to compile.
+* **On-the-Fly Toggle:** Press **`Ctrl + Space`** within any active text input to toggle between English and Bangla phonetic modes.
+* **Real-time Composition Styling:** Displays uncommitted text inline with a composition underline, guaranteeing native visual feedback in modern editors (like VS Code, Chrome, Firefox, and GTK text fields).
+* **Shortcut & Control Pass-through:** Standard layout operations (like `Ctrl + C`, `Ctrl + V`, `Ctrl + A`, `Space`, `Enter`) bypass phonetic interception automatically.
+
+---
+
+## Phonetic Layout Guide
+
+OpenBN follows the standard Avro phonetic transliteration guidelines:
+
+### Vowels & Diacritics (Kar / Matra)
+| Key | Independent | Dependent | Example |
+|---|---|---|---|
+| `o` | অ | | `kotha` $\rightarrow$ `কথা` |
+| `O` | ও | ো | `kOtha` $\rightarrow$ `কোথা` |
+| `a` | আ | া | `amar` $\rightarrow$ `আমার` |
+| `i` | ই | ি | `iti` $\rightarrow$ `ইতি` |
+| `I` / `ee` | ঈ | ী | `kee` $\rightarrow$ `কী` |
+| `u` / `oo` | উ | ু | `kuku` $\rightarrow$ `কুকু` / `koo` $\rightarrow$ `কু` |
+| `U` | ঊ | ূ | `dUro` $\rightarrow$ `দূর` |
+| `e` | এ | ে | `keno` $\rightarrow$ `কেন` |
+| `OI` / `oi` | ঐ | ৈ | `kOI` $\rightarrow$ `কৈ` |
+| `OU` / `ou` | ঔ | ৌ | `kOU` $\rightarrow$ `কৌ` |
+| `rri` | ঋ | ৃ | `krriho` $\rightarrow$ `গৃহ` |
+
+### Consonants & Signs
+| Key | Bengali | Key | Bengali | Key | Bengali |
+|---|---|---|---|---|---|
+| `k` / `ko` | ক | `kh` | খ | `g` | গ |
+| `gh` | ঘ | `c` | চ | `ch` | ছ |
+| `j` | জ | `jh` | ঝ | `T` | ট |
+| `Th` | ঠ | `D` | ড | `Dh` | ঢ |
+| `N` | ণ | `t` | ত | `th` | থ |
+| `d` | দ | `dh` | ধ | `n` | ন |
+| `p` | প | `ph` / `f` | ফ | `b` | ব |
+| `bh` / `v` | ভ | `m` | ম | `z` | য |
+| `r` | র | `l` | ল | `S` / `sh` | শ |
+| `Sh` | ষ | `s` | স | `h` | হ |
+| `R` | ড় | `Rh` | ঢ় | `y` / `Y` | য় / য-ফলা |
+| `t`` ` | ৎ | `ng` | ং | `:` | ঃ |
+| `^` | ঁ | `J` | জ় | `$` | ৳ |
+
+---
+
+## Installation & Setup
+
+### Requirements
+* Fedora (or any Linux distribution running IBus).
+* Rust Toolchain (Cargo & Rustc).
+
+### Quick Install
+To compile and deploy the OpenBN service natively, run the automated installation script inside the repository:
+
+```bash
+./install.sh
+```
+
+This script automatically:
+1. Compiles the phonetic engine and the daemon in release mode.
+2. Deploys the background binary to `~/.local/bin/openbn-daemon`.
+3. Registers the OpenBN engine template at `/usr/share/ibus/component/openbn.xml` (requires one-time `sudo` authentication to copy to the system directory).
+4. Restarts the active IBus daemon session to load the engine.
+
+---
+
+## System Activation
+
+Once installed, register OpenBN as an active Input Source in your desktop environment:
+
+1. Open your system's **Settings** (e.g. GNOME Settings).
+2. Navigate to **Keyboard** $\rightarrow$ **Input Sources**.
+3. Click the **`+` (Add)** button.
+4. Select **Bengali** $\rightarrow$ **Bengali (OpenBN)** and click **Add**.
+5. Switch to the OpenBN input source from your top-bar menu or press **`Super + Space`**.
+6. Type **`Ctrl + Space`** within any text input box to toggle between English and Bangla modes.
+
+---
+
+> A tribute to "Mehdi Hasan Khan" - The creator of Avro Keyboard.
+
+## License
+
+OpenBN is open-source software. Feel free to use, modify, and distribute it under the terms of the project's license.
