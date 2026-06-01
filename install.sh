@@ -14,15 +14,18 @@ echo "--> Creating local bin directory..."
 mkdir -p "$HOME/.local/bin"
 
 echo "--> Copying binary..."
+killall openbn-daemon >/dev/null 2>&1 || pkill -f openbn-daemon >/dev/null 2>&1 || true
 cp target/release/openbn-daemon "$HOME/.local/bin/openbn-daemon"
 chmod +x "$HOME/.local/bin/openbn-daemon"
 
 # 3. Generate and deploy IBus component XML
-echo "--> Creating local IBus component directory..."
-mkdir -p "$HOME/.local/share/ibus/component"
-
 echo "--> Generating openbn.xml with home directory: $HOME"
-sed "s|__HOME__|${HOME}|g" component/openbn.xml.template > "$HOME/.local/share/ibus/component/openbn.xml"
+sed "s|__HOME__|${HOME}|g" component/openbn.xml.template > /tmp/openbn.xml
+
+echo "--> Installing component XML to /usr/share/ibus/component/openbn.xml (requires sudo)..."
+sudo cp /tmp/openbn.xml /usr/share/ibus/component/openbn.xml
+sudo chmod 644 /usr/share/ibus/component/openbn.xml
+rm /tmp/openbn.xml
 
 # 4. Restart IBus daemon to apply changes
 echo "--> Restarting IBus daemon..."

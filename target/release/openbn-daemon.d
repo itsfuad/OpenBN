@@ -1,0 +1,1 @@
+/home/itsfuad/Dev/OpenBN/target/release/openbn-daemon: /home/itsfuad/Dev/OpenBN/openbn-daemon/src/dbus_interface.rs /home/itsfuad/Dev/OpenBN/openbn-daemon/src/main.rs /home/itsfuad/Dev/OpenBN/openbn-phonetic/src/lib.rs /home/itsfuad/Dev/OpenBN/openbn-phonetic/src/rules.rs

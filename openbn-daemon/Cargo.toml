@@ -6,4 +6,5 @@ edition = "2021"
 [dependencies]
 tokio = { version = "1.0", features = ["full"] }
 zbus = { version = "3.14", features = ["tokio"] }
+serde = { version = "1.0", features = ["derive"] }
 openbn-phonetic = { path = "../openbn-phonetic" }
