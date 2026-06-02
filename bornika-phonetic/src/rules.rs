@@ -25,6 +25,10 @@ pub const RULES: &[Rule] = &[
             dependent: "ৃ",
         },
     },
+    Rule {
+        roman: "kkh",
+        token_type: TokenType::Consonant("ক্ষ"),
+    },
     // Length 2
     Rule {
         roman: "kh",
@@ -129,10 +133,6 @@ pub const RULES: &[Rule] = &[
     Rule {
         roman: "ng",
         token_type: TokenType::Sign("ং"),
-    },
-    Rule {
-        roman: "kx",
-        token_type: TokenType::Consonant("ক্ষ"),
     },
 
     Rule {
