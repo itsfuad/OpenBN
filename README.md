@@ -32,8 +32,8 @@ Bornika follows the standard Avro phonetic transliteration guidelines:
 | `u` / `oo` | উ | ু | `kuku` $\rightarrow$ `কুকু` / `koo` $\rightarrow$ `কু` |
 | `U` | ঊ | ূ | `dUro` $\rightarrow$ `দূর` |
 | `e` | এ | ে | `keno` $\rightarrow$ `কেন` |
-| `OI` / `oi` | ঐ | ৈ | `kOI` $\rightarrow$ `কৈ` |
-| `OU` / `ou` | ঔ | ৌ | `kOU` $\rightarrow$ `কৌ` |
+| `oi` / `OI` | ঐ | ৈ | `kOI` $\rightarrow$ `কৈ` |
+| `ou` / `OU` | ঔ | ৌ | `kOU` $\rightarrow$ `কৌ` |
 | `rri` | ঋ | ৃ | `krriho` $\rightarrow$ `গৃহ` |
 
 ### Consonants & Signs
@@ -60,20 +60,26 @@ Bornika follows the standard Avro phonetic transliteration guidelines:
 
 ### Requirements
 * Fedora (or any Linux distribution running IBus).
-* Rust Toolchain (Cargo & Rustc).
 
-### Quick Install
-To compile and deploy the Bornika service natively, run the automated installation script inside the repository:
+### Quick Install (Pre-built Release)
+To download and install the latest pre-built release of Bornika directly on your system, run:
 
 ```bash
-./install.sh
+curl -fsSL https://raw.githubusercontent.com/itsfuad/Bornika/main/install.sh | sh
 ```
 
 This script automatically:
-1. Compiles the phonetic engine and the daemon in release mode.
+1. Downloads the latest pre-built `bornika-daemon` binary from GitHub Releases.
 2. Deploys the background binary to `~/.local/bin/bornika-daemon`.
 3. Registers the Bornika engine template at `/usr/share/ibus/component/bornika.xml` (requires one-time `sudo` authentication to copy to the system directory).
 4. Restarts the active IBus daemon session to load the engine.
+
+### Building from Source
+If you prefer to compile and install Bornika from source, you will need the Rust toolchain (Cargo & Rustc) installed. Clone the repository and run:
+
+```bash
+./build.sh
+```
 
 ---
 
