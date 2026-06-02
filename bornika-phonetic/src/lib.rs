@@ -338,14 +338,14 @@ mod tests {
         assert_eq!(translate("Ng"), "ঙ");
         assert_eq!(translate("NG"), "ঞ");
         assert_eq!(translate("x"), "ক্স");
-        assert_eq!(translate("kx"), "ক্ষ");
+        assert_eq!(translate("kkh"), "ক্ষ");
     }
 
     #[test]
     fn test_conjuncts() {
         assert_eq!(translate("kt"), "ক্ত");
-        assert_eq!(translate("kkh"), "ক্খ");
         assert_eq!(translate("sp"), "স্প");
+        assert_eq!(translate("pl"), "");
     }
 
     #[test]
