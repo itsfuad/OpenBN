@@ -14,7 +14,7 @@ pub fn log_info(msg: &str) {
 
 /// Checks if the keyval is an ASCII composition key.
 /// We only swallow key releases for alphanumeric characters, backtick (0x60), period (0x2E),
-/// caret (0x5E), and colon (0x3A) when actively composing.
+/// caret (0x5E), colon (0x3A), and comma (0x2C) when actively composing.
 fn is_composition_key(keyval: u32) -> bool {
     (0x30..=0x39).contains(&keyval) || // 0-9
     (0x41..=0x5A).contains(&keyval) || // A-Z
@@ -22,7 +22,8 @@ fn is_composition_key(keyval: u32) -> bool {
     keyval == 0x60 ||                  // backtick
     keyval == 0x2E ||                  // period
     keyval == 0x5E ||                  // caret (^)
-    keyval == 0x3A                     // colon (:)
+    keyval == 0x3A ||                  // colon (:)
+    keyval == 0x2C                     // comma (,)
 }
 
 /// Dynamically constructs the exact GVariant wire layout expected by the IBus daemon.
@@ -296,8 +297,8 @@ impl IBusEngine {
                              (0x5B..=0x60).contains(&keyval) || 
                              (0x7B..=0x7E).contains(&keyval);
         
-        // Exclude backtick (0x60) and period (0x2E) from commit as they are semantic phonetic rules
-        let is_commit_punctuation = is_punctuation && keyval != 0x60 && keyval != 0x2E;
+        // Exclude backtick (0x60), period (0x2E), colon (0x3A), caret (0x5E), and comma (0x2C) from commit as they are semantic phonetic rules
+        let is_commit_punctuation = is_punctuation && keyval != 0x60 && keyval != 0x2E && keyval != 0x3A && keyval != 0x5E && keyval != 0x2C;
 
         if is_enter || is_commit_punctuation {
             let mut committed_text = None;

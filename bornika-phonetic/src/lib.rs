@@ -93,7 +93,7 @@ pub fn translate(input: &str) -> String {
                     }
                     rules::TokenType::Consonant(val) => {
                         // Special rules for 'y'
-                        if rule.roman == "y" {
+                        if rule.roman == "y" || rule.roman == "Y" {
                             let preceded_by_consonant = last_token_was_consonant && 
                                 output.chars().last().map(rules::is_consonant).unwrap_or(false);
                             if preceded_by_consonant {
@@ -228,6 +228,36 @@ mod tests {
     fn test_y_ja_phala() {
         assert_eq!(translate("ky"), "ক্য"); // ja-phala
         assert_eq!(translate("ay"), "আয়"); // yya
+        assert_eq!(translate("bybohar"), "ব্যবহার");
+        assert_eq!(translate("byakti"), "ব্যক্তি");
+        assert_eq!(translate("kya"), "ক্যা");
+    }
+
+    #[test]
+    fn test_z_force_yaphala() {
+        assert_eq!(translate("oZaDmin"), "অ্যাডমিন");
+        assert_eq!(translate("oZarOmeTik"), "অ্যারোমেটিক");
+        assert_eq!(translate("kZ"), "ক্য");
+        assert_eq!(translate("kZa"), "ক্যা");
+        assert_eq!(translate("oZa"), "অ্যা");
+    }
+
+    #[test]
+    fn test_hasant_double_comma() {
+        assert_eq!(translate("k,,k"), "ক্ক");
+        assert_eq!(translate("k,,"), "ক্");
+    }
+
+    #[test]
+    fn test_colon_escape() {
+        assert_eq!(translate(":`"), ":");
+        assert_eq!(translate("k:`"), "ক:");
+    }
+
+    #[test]
+    fn test_bisorgo_and_chandrabindu() {
+        assert_eq!(translate("k:"), "কঃ");
+        assert_eq!(translate("k^"), "কঁ");
     }
 
     #[test]

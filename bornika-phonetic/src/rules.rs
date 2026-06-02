@@ -134,6 +134,15 @@ pub const RULES: &[Rule] = &[
         roman: "kx",
         token_type: TokenType::Consonant("ক্ষ"),
     },
+
+    Rule {
+        roman: ",,",
+        token_type: TokenType::Sign("্"),
+    },
+    Rule {
+        roman: ":`",
+        token_type: TokenType::Punctuation(":"),
+    },
     // Length 1
     Rule {
         roman: "k",
@@ -226,6 +235,14 @@ pub const RULES: &[Rule] = &[
     Rule {
         roman: "y",
         token_type: TokenType::Consonant("য়"), // Special rules apply in engine.rs
+    },
+    Rule {
+        roman: "Y",
+        token_type: TokenType::Consonant("য়"), // Special rules apply in engine.rs
+    },
+    Rule {
+        roman: "Z",
+        token_type: TokenType::Consonant("্য"),
     },
     Rule {
         roman: "x",
