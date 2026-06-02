@@ -19,13 +19,6 @@ pub struct Rule {
 pub const RULES: &[Rule] = &[
     // Length 3
     Rule {
-        roman: "rRI",
-        token_type: TokenType::Vowel {
-            independent: "ঋ",
-            dependent: "ৃ",
-        },
-    },
-    Rule {
         roman: "rri",
         token_type: TokenType::Vowel {
             independent: "ঋ",
@@ -86,24 +79,10 @@ pub const RULES: &[Rule] = &[
         token_type: TokenType::Consonant("ষ"),
     },
     Rule {
-        roman: "oi",
-        token_type: TokenType::Vowel {
-            independent: "ঐ",
-            dependent: "ৈ",
-        },
-    },
-    Rule {
         roman: "OI",
         token_type: TokenType::Vowel {
             independent: "ঐ",
             dependent: "ৈ",
-        },
-    },
-    Rule {
-        roman: "ou",
-        token_type: TokenType::Vowel {
-            independent: "ঔ",
-            dependent: "ৌ",
         },
     },
     Rule {
