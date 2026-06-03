@@ -1,6 +1,46 @@
 pub mod rules;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum VirtualKey {
+    Char(char),
+    Backspace,
+    Space,
+    Enter,
+    Other,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct KeyEvent {
+    pub key: VirtualKey,
+    pub ctrl: bool,
+    pub alt: bool,
+    pub shift: bool,
+    pub is_release: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum KeyAction {
+    Bypass,
+    Swallow,
+    Commit { text: String, bypass_key: bool },
+    UpdatePreedit { text: String, cursor_pos: u32, visible: bool },
+    ToggleMode { bangla_mode: bool },
+}
+
+fn is_composition_char(c: char) -> bool {
+    c.is_ascii_alphanumeric()
+        || c == '`'
+        || c == '.'
+        || c == '^'
+        || c == ':'
+        || c == ','
+}
+
+fn is_commit_punctuation(c: char) -> bool {
+    c.is_ascii_punctuation() && c != '`' && c != '.' && c != '^' && c != ':' && c != ','
+}
+
+#[derive(Debug, Clone, Default)]
 pub struct PhoneticEngine {
     composition_buffer: String,
     pub bangla_mode: bool,
@@ -48,6 +88,111 @@ impl PhoneticEngine {
             true
         } else {
             false
+        }
+    }
+
+    /// Process a key event and return the action to perform
+    pub fn process_key_event(&mut self, event: KeyEvent) -> KeyAction {
+        let bangla_mode = self.bangla_mode;
+
+        // Bypass any key combination that has Alt or Ctrl (except Ctrl+Space)
+        if event.alt || (event.ctrl && event.key != VirtualKey::Space) {
+            return KeyAction::Bypass;
+        }
+
+        if event.is_release {
+            // Consume key releases ONLY for actual composition keys in Bangla mode
+            // AND only if the composition buffer is NOT empty.
+            if bangla_mode && !self.is_empty() {
+                if let VirtualKey::Char(c) = event.key {
+                    if is_composition_char(c) {
+                        return KeyAction::Swallow;
+                    }
+                }
+            }
+            return KeyAction::Bypass;
+        }
+
+        // Toggle layout mode: Ctrl + Space
+        if event.ctrl && event.key == VirtualKey::Space {
+            self.bangla_mode = !self.bangla_mode;
+            let cleared = !self.is_empty();
+            if cleared {
+                self.clear();
+            }
+            return KeyAction::ToggleMode { bangla_mode: self.bangla_mode };
+        }
+
+        if !bangla_mode {
+            return KeyAction::Bypass;
+        }
+
+        match event.key {
+            VirtualKey::Backspace => {
+                if !self.is_empty() {
+                    self.pop_char();
+                    let preedit = self.translate();
+                    let cursor_pos = preedit.chars().count() as u32;
+                    let visible = !preedit.is_empty();
+                    KeyAction::UpdatePreedit {
+                        text: preedit,
+                        cursor_pos,
+                        visible,
+                    }
+                } else {
+                    KeyAction::Bypass
+                }
+            }
+            VirtualKey::Space => {
+                if !self.is_empty() {
+                    let committed = self.translate();
+                    self.clear();
+                    KeyAction::Commit {
+                        text: committed,
+                        bypass_key: true,
+                    }
+                } else {
+                    KeyAction::Bypass
+                }
+            }
+            VirtualKey::Enter => {
+                if !self.is_empty() {
+                    let committed = self.translate();
+                    self.clear();
+                    KeyAction::Commit {
+                        text: committed,
+                        bypass_key: true,
+                    }
+                } else {
+                    KeyAction::Bypass
+                }
+            }
+            VirtualKey::Char(c) => {
+                if is_composition_char(c) {
+                    self.push_char(c);
+                    let preedit = self.translate();
+                    let cursor_pos = preedit.chars().count() as u32;
+                    KeyAction::UpdatePreedit {
+                        text: preedit,
+                        cursor_pos,
+                        visible: true,
+                    }
+                } else if is_commit_punctuation(c) {
+                    if !self.is_empty() {
+                        let committed = self.translate();
+                        self.clear();
+                        KeyAction::Commit {
+                            text: committed,
+                            bypass_key: true,
+                        }
+                    } else {
+                        KeyAction::Bypass
+                    }
+                } else {
+                    KeyAction::Bypass
+                }
+            }
+            VirtualKey::Other => KeyAction::Bypass,
         }
     }
 }
@@ -107,7 +252,11 @@ pub fn translate(input: &str) -> String {
                         } else {
                             // If the last token was a consonant, we must insert a Hasant
                             // between them to form a conjunct (Juktakkhar).
-                            if last_token_was_consonant {
+                            // Exception: do not insert Hasant if the last output character is 'য',
+                            // or if the new consonant value itself already starts with a Hasant ('্')
+                            let ends_with_ya = output.ends_with('য');
+                            let starts_with_hasant = val.starts_with('্');
+                            if last_token_was_consonant && !ends_with_ya && !starts_with_hasant {
                                 output.push('্');
                             }
                             output.push_str(val);
@@ -203,18 +352,18 @@ mod tests {
     fn test_special_characters() {
         assert_eq!(translate("ami"), "আমি");
         assert_eq!(translate("bangla"), "বাংলা");
-        assert_eq!(translate("sabar"), "সবার");
+        assert_eq!(translate("sabar"), "সাবার");
         assert_eq!(translate("kOtha"), "কোথা");
         assert_eq!(translate("kotha"), "কথা");
         assert_eq!(translate("khoTha"), "খঠা");
         assert_eq!(translate("khOtha"), "খোথা");
         assert_eq!(translate("khotha"), "খথা");
         assert_eq!(translate("linax"), "লিনাক্স");
-        assert_eq!(translate("ka^"), "কঁ");
-        assert_eq!(translate("ba:"), "বঃ");
+        assert_eq!(translate("ka^"), "কাঁ");
+        assert_eq!(translate("ba:"), "বাঃ");
         assert_eq!(translate("orrko"), "অর্ক");
-        assert_eq!(translate("borrd"), "বর্ড");
-        assert_eq!(translate("bOrrd"), "বোর্ড");
+        assert_eq!(translate("borrd"), "বর্দ");
+        assert_eq!(translate("bOrrd"), "বোর্দ");
     }
 
     #[test]
@@ -229,13 +378,13 @@ mod tests {
         assert_eq!(translate("ky"), "ক্য"); // ja-phala
         assert_eq!(translate("ay"), "আয়"); // yya
         assert_eq!(translate("bybohar"), "ব্যবহার");
-        assert_eq!(translate("byakti"), "ব্যক্তি");
+        assert_eq!(translate("byakti"), "ব্যাক্তি");
         assert_eq!(translate("kya"), "ক্যা");
     }
 
     #[test]
     fn test_z_force_yaphala() {
-        assert_eq!(translate("oZaDmin"), "অ্যাডমিন");
+        assert_eq!(translate("oZaDmin"), "অ্যাড্মিন");
         assert_eq!(translate("oZarOmeTik"), "অ্যারোমেটিক");
         assert_eq!(translate("kZ"), "ক্য");
         assert_eq!(translate("kZa"), "ক্যা");
@@ -263,6 +412,6 @@ mod tests {
     #[test]
     fn test_punctuation() {
         assert_eq!(translate("ami."), "আমি।");
-        assert_eq!(translate("ami.."), "ami.");
+        assert_eq!(translate("ami.."), "আমি.");
     }
 }

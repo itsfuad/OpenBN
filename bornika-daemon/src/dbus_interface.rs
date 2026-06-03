@@ -12,19 +12,6 @@ pub fn log_info(msg: &str) {
     }
 }
 
-/// Checks if the keyval is an ASCII composition key.
-/// We only swallow key releases for alphanumeric characters, backtick (0x60), period (0x2E),
-/// caret (0x5E), colon (0x3A), and comma (0x2C) when actively composing.
-fn is_composition_key(keyval: u32) -> bool {
-    (0x30..=0x39).contains(&keyval) || // 0-9
-    (0x41..=0x5A).contains(&keyval) || // A-Z
-    (0x61..=0x7A).contains(&keyval) || // a-z
-    keyval == 0x60 ||                  // backtick
-    keyval == 0x2E ||                  // period
-    keyval == 0x5E ||                  // caret (^)
-    keyval == 0x3A ||                  // colon (:)
-    keyval == 0x2C                     // comma (,)
-}
 
 /// Dynamically constructs the exact GVariant wire layout expected by the IBus daemon.
 /// 
@@ -184,161 +171,58 @@ impl IBusEngine {
             engine.bangla_mode
         };
 
+        let key = if keyval == 0xFF08 {
+            bornika_phonetic::VirtualKey::Backspace
+        } else if keyval == 0x20 {
+            bornika_phonetic::VirtualKey::Space
+        } else if keyval == 0xFF0D || keyval == 0xFF8D {
+            bornika_phonetic::VirtualKey::Enter
+        } else if (0x20..=0x7E).contains(&keyval) {
+            bornika_phonetic::VirtualKey::Char(keyval as u8 as char)
+        } else {
+            bornika_phonetic::VirtualKey::Other
+        };
+
+        let event = bornika_phonetic::KeyEvent {
+            key,
+            ctrl: (state & 4) != 0,
+            alt: (state & 8) != 0,
+            shift: (state & 1) != 0,
+            is_release,
+        };
+
         log_info(&format!(
             "Engine: ProcessKeyEvent (keyval: 0x{:X}, keycode: {}, state: 0x{:X}, is_release: {}, bangla_mode: {})",
             keyval, keycode, state, is_release, bangla_mode
         ));
 
-        // 1. Bypass modifiers like Control, Alt, or Super (Ctrl = 4, Alt = 8, Super = 64)
-        // This ensures system shortcuts (Ctrl+A, Ctrl+C, etc.) work perfectly under both layouts.
-        let has_modifiers = (state & (4 | 8 | 64)) != 0;
-        if has_modifiers {
-            return false;
-        }
+        let action = {
+            let mut engine = self.engine.lock().unwrap();
+            engine.process_key_event(event)
+        };
 
-        if is_release {
-            // Consume key releases ONLY for actual composition keys in Bangla mode
-            // AND only if the composition buffer is NOT empty (meaning we captured the press).
-            // This prevents shortcut key release event mismatches (e.g. Ctrl+C), which
-            // could otherwise cause infinite repeating keys if Ctrl was released first!
-            let is_composing = {
-                let engine = self.engine.lock().unwrap();
-                !engine.is_empty()
-            };
-            if bangla_mode && is_composing && is_composition_key(keyval) {
-                return true;
-            }
-            return false; // Let other key releases pass through
-        }
-
-        // Toggle layout mode: Ctrl + Space (Ctrl mask = 4, Space keyval = 0x20)
-        let is_ctrl = (state & 4) != 0;
-        if is_ctrl && keyval == 0x20 {
-            let cleared = {
-                let mut engine = self.engine.lock().unwrap();
-                engine.bangla_mode = !engine.bangla_mode;
-                log_info(&format!("Engine: Toggled Bangla typing mode to {}", engine.bangla_mode));
-                
-                let was_not_empty = !engine.is_empty();
-                if was_not_empty {
-                    engine.clear();
-                }
-                was_not_empty
-            };
-
-            if cleared {
+        match action {
+            bornika_phonetic::KeyAction::Bypass => false,
+            bornika_phonetic::KeyAction::Swallow => true,
+            bornika_phonetic::KeyAction::ToggleMode { bangla_mode } => {
+                log_info(&format!("Engine: Toggled Bangla typing mode to {}", bangla_mode));
                 let empty_text = create_ibus_text("");
                 let _ = Self::update_preedit_text(&ctxt, empty_text, 0, false, 0).await;
+                true
             }
-            return true; // Swallowed
-        }
-
-        if !bangla_mode {
-            return false; // Direct bypass in English mode
-        }
-
-        // Backspace key (keyval: 0xFF08)
-        if keyval == 0xFF08 {
-            let mut preedit_to_update = None;
-            let mut pass_through = false;
-
-            {
-                let mut engine = self.engine.lock().unwrap();
-                if !engine.is_empty() {
-                    engine.pop_char();
-                    preedit_to_update = Some(engine.translate());
-                } else {
-                    pass_through = true;
-                }
-            }
-
-            if pass_through {
-                return false; // Pass through to editor to backspace previous character
-            }
-
-            if let Some(preedit) = preedit_to_update {
-                let cursor_pos = preedit.chars().count() as u32;
-                let visible = !preedit.is_empty();
-                let text = create_ibus_text_styled(&preedit);
-                let _ = Self::update_preedit_text(&ctxt, text, cursor_pos, visible, 0).await;
-                return true; // Swallowed
-            }
-            return false;
-        }
-
-        // Space key (keyval: 0x20)
-        if keyval == 0x20 {
-            let mut committed_text = None;
-
-            {
-                let mut engine = self.engine.lock().unwrap();
-                if !engine.is_empty() {
-                    committed_text = Some(engine.translate());
-                    engine.clear();
-                }
-            }
-
-            if let Some(committed) = committed_text {
-                // Clear preedit visually
+            bornika_phonetic::KeyAction::Commit { text, bypass_key } => {
                 let empty_text = create_ibus_text("");
                 let _ = Self::update_preedit_text(&ctxt, empty_text, 0, false, 0).await;
-                
-                // Commit current word
-                let text = create_ibus_text(&committed);
-                let _ = Self::commit_text(&ctxt, text).await;
+                let val_text = create_ibus_text(&text);
+                let _ = Self::commit_text(&ctxt, val_text).await;
+                !bypass_key
             }
-            return false; // Pass through space key to type the actual space character in editor
-        }
-
-        // Enter keys (Enter: 0xFF0D, Return: 0xFF8D) or standard commit punctuations
-        let is_enter = keyval == 0xFF0D || keyval == 0xFF8D;
-        let is_punctuation = (0x21..=0x2F).contains(&keyval) || 
-                             (0x3A..=0x40).contains(&keyval) || 
-                             (0x5B..=0x60).contains(&keyval) || 
-                             (0x7B..=0x7E).contains(&keyval);
-        
-        // Exclude backtick (0x60), period (0x2E), colon (0x3A), caret (0x5E), and comma (0x2C) from commit as they are semantic phonetic rules
-        let is_commit_punctuation = is_punctuation && keyval != 0x60 && keyval != 0x2E && keyval != 0x3A && keyval != 0x5E && keyval != 0x2C;
-
-        if is_enter || is_commit_punctuation {
-            let mut committed_text = None;
-
-            {
-                let mut engine = self.engine.lock().unwrap();
-                if !engine.is_empty() {
-                    committed_text = Some(engine.translate());
-                    engine.clear();
-                }
+            bornika_phonetic::KeyAction::UpdatePreedit { text, cursor_pos, visible } => {
+                let styled_text = create_ibus_text_styled(&text);
+                let _ = Self::update_preedit_text(&ctxt, styled_text, cursor_pos, visible, 0).await;
+                true
             }
-
-            if let Some(committed) = committed_text {
-                // Clear preedit
-                let empty_text = create_ibus_text("");
-                let _ = Self::update_preedit_text(&ctxt, empty_text, 0, false, 0).await;
-                
-                // Commit word
-                let text = create_ibus_text(&committed);
-                let _ = Self::commit_text(&ctxt, text).await;
-            }
-            return false; // Let Enter/punctuation pass through naturally to commit word and trigger newline/punctuation
         }
-
-        // Standard character keyval mapping (ASCII range U+0020 to U+007E)
-        if (0x20..=0x7E).contains(&keyval) {
-            let c = keyval as u8 as char;
-            let preedit = {
-                let mut engine = self.engine.lock().unwrap();
-                engine.push_char(c);
-                engine.translate()
-            };
-            
-            let cursor_pos = preedit.chars().count() as u32;
-            let text = create_ibus_text_styled(&preedit);
-            let _ = Self::update_preedit_text(&ctxt, text, cursor_pos, true, 0).await;
-            return true; // Consumed
-        }
-
-        false // Other functional keys pass through
     }
 
     // Signals
