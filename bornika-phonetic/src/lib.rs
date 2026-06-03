@@ -345,7 +345,7 @@ mod tests {
     fn test_conjuncts() {
         assert_eq!(translate("kt"), "ক্ত");
         assert_eq!(translate("sp"), "স্প");
-        assert_eq!(translate("pl"), "");
+        assert_eq!(translate("pl"), "প্ল");
     }
 
     #[test]
