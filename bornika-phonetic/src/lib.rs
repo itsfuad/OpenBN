@@ -1,3 +1,5 @@
+mod utils;
+
 pub mod rules;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
