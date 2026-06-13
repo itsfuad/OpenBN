@@ -11,7 +11,7 @@ By connecting directly to the **IBus (Intelligent Input Bus)** framework over th
 * **Complete Avro Phonetic Support:** Fully supports all standard phonetic combinations (e.g., `kotha` $\rightarrow$ `কথা`, `kOtha` $\rightarrow$ `কোথা`, `rri` $\rightarrow$ `ঋ`, `S` $\rightarrow$ `শ`, `Sh` $\rightarrow$ `ষ`, `borrd` $\rightarrow$ `বর্ড`).
 * **Wayland & X11 Native:** Native compatibility across all window servers by leveraging the IBus system service.
 * **Pure Rust Architecture:** Built using `tokio` and `zbus` to connect directly over D-Bus. No dynamic link bindings (`libibus-devel`, `glib2-devel`) are required to compile.
-* **On-the-Fly Toggle:** Press **`Ctrl + Space`** within any active text input to toggle between English and Bangla phonetic modes.
+* **On-the-Fly Toggle:** Press **`Super + Space`** within any active text input to toggle between English and Bangla phonetic modes.
 * **Real-time Composition Styling:** Displays uncommitted text inline with a composition underline, guaranteeing native visual feedback in modern editors (like VS Code, Chrome, Firefox, and GTK text fields).
 * **Shortcut & Control Pass-through:** Standard layout operations (like `Ctrl + C`, `Ctrl + V`, `Ctrl + A`, `Space`, `Enter`) bypass phonetic interception automatically.
 
@@ -92,11 +92,10 @@ Once installed, register Bornika as an active Input Source in your desktop envir
 3. Click the **`+` (Add)** button.
 4. Select **Bengali** $\rightarrow$ **Bengali (Bornika)** and click **Add**.
 5. Switch to the Bornika input source from your top-bar menu or press **`Super + Space`**.
-6. Type **`Ctrl + Space`** within any text input box to toggle between English and Bangla modes.
 
 ---
 
-> A tribute to "Mehdi Hasan Khan" - The creator of Avro Keyboard.
+> A tribute to <a href="https://github.com/itsfuad"><img src="https://images.weserv.nl/?url=github.com/mugli.png&w=60&h=60&fit=cover&mask=circle" width="30" alt="@mugli" /></a> Mehdi Hasan Khan - Creator of Avro Keyboard.
 
 ## License
 
